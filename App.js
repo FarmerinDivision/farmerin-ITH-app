@@ -1,20 +1,61 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { NativeRouter, Routes, Route, Navigate } from "react-router-native";
+import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import Login from "./src/components/Login";
+import Register from "./src/components/Register";
+import Home from "./src/components/Home";
+import TamboDetalle from "./src/components/TamboDetalle";
+import Configuracion from "./src/components/Configuracion";
+import { View, StyleSheet } from "react-native";
+
+function PrivateRoute({ children }) {
+  const { currentUser } = useAuth();
+  return currentUser ? children : <Navigate to="/login" />;
+}
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NativeRouter>
+      <AuthProvider>
+        <View style={styles.container}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/home"
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/tambo/:id"
+              element={
+                <PrivateRoute>
+                  <TamboDetalle />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/configuracion"
+              element={
+                <PrivateRoute>
+                  <Configuracion />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/home" />} />
+          </Routes>
+        </View>
+      </AuthProvider>
+    </NativeRouter>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f4f4f9",
   },
 });
