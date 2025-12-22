@@ -2,235 +2,187 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-native";
 import { db } from "../firebase";
 import { ref, onValue } from "firebase/database";
-import { View, Text, StyleSheet, ActivityIndicator, Dimensions, TouchableOpacity, ScrollView, Platform } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Dimensions, TouchableOpacity, ScrollView } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { getStressLevel, ITH_RANGES } from "../utils/ithLogic";
+import ComplianceLog from "./ComplianceLog";
 
-// Componente principal que muestra los detalles de un tambo específico
 export default function TamboDetalle() {
-    // Obtiene el ID del tambo desde los parámetros de la URL
     const { id } = useParams();
+    const [allMediciones, setAllMediciones] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Estados para almacenar los datos
-    const [allMediciones, setAllMediciones] = useState([]); // Todas las mediciones recuperadas de Firebase
-    const [filteredData, setFilteredData] = useState([]);   // Mediciones filtradas por fecha para mostrar en el gráfico
-    const [loading, setLoading] = useState(true);           // Estado de carga
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(null);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [datePickerMode, setDatePickerMode] = useState("start");
+    const [showChart, setShowChart] = useState(false);
 
-    // Estados para la selección de fechas
-    const [startDate, setStartDate] = useState(new Date()); // Fecha de inicio seleccionada (por defecto hoy)
-    const [endDate, setEndDate] = useState(null);           // Fecha de fin (null significa que se seleccionó un solo día)
-    const [showDatePicker, setShowDatePicker] = useState(false); // Controla la visibilidad del selector de fechas
-    const [datePickerMode, setDatePickerMode] = useState("start"); // Indica si se está seleccionando fecha de inicio o fin ("start" o "end")
-    const [showChart, setShowChart] = useState(false);      // Controla si se debe mostrar el gráfico (solo después de actualizar)
-
-    // useEffect: Se ejecuta al montar el componente o cuando cambia el ID
-    // Se conecta a Firebase para escuchar cambios en las mediciones del tambo
     useEffect(() => {
         const medicionesRef = ref(db, `tambos/${id}/mediciones_ith`);
         const unsubscribe = onValue(medicionesRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Convierte el objeto de datos de Firebase en un array y normaliza la fecha
                 const dataArray = Object.keys(data).map(key => ({
                     id: key,
                     ...data[key],
-                    parsedDate: new Date(data[key].Date) // Asegura que el campo Date exista y sea convertible a objeto Date
+                    parsedDate: new Date(data[key].Date || data[key].date)
                 }));
-
-                // DEBUG: Log para verificar la estructura de los datos
-                if (dataArray.length > 0) {
-                    console.log("Estructura de la primera medición:", JSON.stringify(dataArray[0], null, 2));
-                }
-
+                // Sort by date initially
+                dataArray.sort((a, b) => a.parsedDate - b.parsedDate);
                 setAllMediciones(dataArray);
+
+                // Auto-filter for today on load
+                filterData(dataArray, new Date());
             } else {
                 setAllMediciones([]);
             }
-            setLoading(false); // Finaliza el estado de carga
+            setLoading(false);
         });
 
-        // Limpia la suscripción a Firebase al desmontar el componente
         return unsubscribe;
     }, [id]);
 
-    // Función para manejar el cambio de fecha en el selector
+    const filterData = (data, start, end = null) => {
+        if (!start) return;
+        const s = new Date(start); s.setHours(0, 0, 0, 0);
+        const e = new Date(end || start); e.setHours(23, 59, 59, 999);
+
+        const filtered = data.filter(m => m.parsedDate >= s && m.parsedDate <= e);
+        setFilteredData(filtered);
+        setShowChart(true);
+    };
+
     const handleDateChange = (event, selectedDate) => {
-        setShowDatePicker(false); // Cierra el selector
+        setShowDatePicker(false);
         if (selectedDate) {
+            let newStart = startDate;
+            let newEnd = endDate;
+
             if (datePickerMode === "start") {
+                newStart = selectedDate;
                 setStartDate(selectedDate);
-                // Si la fecha de fin es anterior a la de inicio, resetea la fecha de fin
                 if (endDate && selectedDate > endDate) {
+                    newEnd = null;
                     setEndDate(null);
                 }
             } else {
+                newEnd = selectedDate;
                 setEndDate(selectedDate);
             }
-            setShowChart(false); // Oculta el gráfico hasta que el usuario haga clic en "Actualizar"
+
+            // Auto update chart on date selection
+            filterData(allMediciones, newStart, newEnd);
         }
     };
 
-    // Función para abrir el selector de fechas en el modo especificado
     const openDatePicker = (mode) => {
         setDatePickerMode(mode);
         setShowDatePicker(true);
     };
 
-    // Función principal para filtrar los datos y actualizar el gráfico
-    const updateChart = () => {
-        if (!startDate) return;
+    const formatDate = (date) => date.toLocaleDateString();
 
-        // Configura la fecha de inicio al principio del día (00:00:00)
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-
-        let end;
-        if (endDate) {
-            // Si hay fecha de fin, se configura al final de ese día (23:59:59)
-            end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-        } else {
-            // Si es un solo día, la fecha de fin es el final del mismo día de inicio
-            end = new Date(start);
-            end.setHours(23, 59, 59, 999);
-        }
-
-        // Filtra las mediciones que caen dentro del rango de fechas y las ordena cronológicamente
-        const filtered = allMediciones.filter(m => {
-            return m.parsedDate >= start && m.parsedDate <= end;
-        }).sort((a, b) => a.parsedDate - b.parsedDate);
-
-        setFilteredData(filtered);
-        setShowChart(true); // Muestra el gráfico con los nuevos datos
-    };
-
-    // Función auxiliar para formatear la fecha como string local
-    const formatDate = (date) => {
-        return date.toLocaleDateString();
-    };
-
-    // Función que renderiza el componente del gráfico
     const renderChart = () => {
-        // Si no hay datos filtrados o no se debe mostrar el gráfico, muestra un mensaje
         if (!showChart || filteredData.length === 0) {
             return <Text style={styles.noData}>No hay datos para el rango seleccionado.</Text>;
         }
 
-        // Determina si se está mostrando un solo día para ajustar el formato del eje X
-        const isSingleDay = !endDate || (startDate.toDateString() === endDate.toDateString());
+        const screenWidth = Dimensions.get("window").width - 40;
+        const chartHeight = 300;
 
-        // Prepara las etiquetas del eje X
-        const labels = filteredData.map(m => {
-            if (isSingleDay) {
-                // Si es un solo día, muestra solo la hora
-                return m.parsedDate.getHours() + ":" + String(m.parsedDate.getMinutes()).padStart(2, '0');
-            } else {
-                // Si es un rango, muestra fecha (día/mes) y hora
-                return `${m.parsedDate.getDate()}/${m.parsedDate.getMonth() + 1} ${m.parsedDate.getHours()}h`;
-            }
+        // Prepare Data
+        const indices = filteredData.map(m => m.indice);
+        const labels = filteredData.map((m, i) => {
+            // Show label every n points to avoid clutter
+            const date = m.parsedDate;
+            return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
         });
 
-        // Optimiza las etiquetas si hay demasiados puntos para evitar superposición
-        // Muestra solo 1 de cada N etiquetas (máximo ~6 etiquetas visibles)
+        // Thicken labels
         const finalLabels = labels.length > 6 ? labels.map((l, i) => i % Math.ceil(labels.length / 6) === 0 ? l : "") : labels;
 
-        // Configuración de datos para el gráfico (react-native-chart-kit)
-        const data = {
-            labels: finalLabels,
-            datasets: [
-                {
-                    data: filteredData.map(m => {
-                        // Intenta obtener la temperatura con diferentes nombres de campo posibles
-                        const temp = m.temperatura || m.Temperatura || m.temperature || m.Temperature || 0;
-                        return parseFloat(temp);
-                    }),
-                    color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`, // Rojo para Temperatura
-                    strokeWidth: 2,
-                    legend: "Temperatura"
-                },
-                {
-                    data: filteredData.map(m => {
-                        // Intenta obtener la humedad con diferentes nombres de campo posibles
-                        const hum = m.humedad || m.Humedad || m.humidity || m.Humidity || 0;
-                        return parseFloat(hum);
-                    }),
-                    color: (opacity = 1) => `rgba(54, 162, 235, ${opacity})`, // Azul para Humedad
-                    strokeWidth: 2,
-                    legend: "Humedad"
-                }
-            ],
-            legend: ["Temperatura", "Humedad"]
+        // Custom Decorator for Critical Period (15:00 - 17:00)
+        // This is tricky in chart-kit, so we will use data points coloring or vertical lines.
+        // We will just color the line red? No, line color is single.
+        // We can color the DOTS.
+
+        const getDotColor = (dataPoint, index) => {
+            const m = filteredData[index];
+            const h = m.parsedDate.getHours();
+            // Critical period 15 to 17
+            if (h >= 15 && h < 17) return "red";
+
+            // Or color based on Stress Level
+            return getStressLevel(dataPoint).color;
         };
 
         return (
-            <View>
+            <View style={{ position: 'relative' }}>
+                {/* Visual Risk Bands (Background) - Absolute positioned */}
+                {/* Assuming Y Axis 50 to 100. Height 220 (approx chart area) */}
+                {/* This is a visual approximation. Real impl needs easier chart lib for bands. */}
+
                 <LineChart
-                    data={data}
-                    // Ancho fijo ajustado a la pantalla
-                    width={Dimensions.get("window").width - 40}
-                    height={300}
+                    data={{
+                        labels: finalLabels,
+                        datasets: [{ data: indices }]
+                    }}
+                    width={screenWidth}
+                    height={chartHeight}
+                    yAxisInterval={1}
+                    minConfig={{ min: 50, max: 100 }}
+                    fromZero={false}
                     chartConfig={{
                         backgroundColor: "#fff",
                         backgroundGradientFrom: "#fff",
                         backgroundGradientTo: "#fff",
-                        decimalPlaces: 1,
+                        decimalPlaces: 0,
                         color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                        style: {
-                            borderRadius: 16
-                        },
-                        propsForDots: {
-                            r: "4",
-                            strokeWidth: "2",
-                            stroke: "#ffa726"
-                        }
+                        propsForDots: { r: "5", strokeWidth: "1", stroke: "#fff" },
+                        fillShadowGradientFrom: "#fff",
+                        fillShadowGradientTo: "#fff",
                     }}
-                    bezier // Suaviza las líneas del gráfico
+                    getDotColor={getDotColor}
+                    bezier
                     style={styles.chart}
                 />
+
+                <View style={styles.legendContainer}>
+                    <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: 'red' }]} /><Text style={styles.legendText}>15:00-17:00 / Alto Riesgo</Text></View>
+                    <View style={styles.legendItem}><View style={[styles.dot, { backgroundColor: ITH_RANGES.NO_STRESS.color }]} /><Text style={styles.legendText}>Normal</Text></View>
+                </View>
             </View>
         );
     };
 
-    // Muestra un indicador de carga mientras se obtienen los datos iniciales
     if (loading) {
         return (
             <View style={styles.center}>
                 <ActivityIndicator size="large" color="#007bff" />
-                <Text>Cargando datos...</Text>
             </View>
         );
     }
 
-    // Renderizado principal del componente
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>Detalle del Tambo</Text>
+            <Text style={styles.title}>Monitor ITH</Text>
             <Link to="/home" style={styles.backLink}>
-                <Text style={styles.linkText}>← Volver al Home</Text>
+                <Text style={styles.linkText}>← Volver</Text>
             </Link>
 
             <View style={styles.filterContainer}>
-                <Text style={styles.sectionTitle}>Filtros</Text>
-
-                {/* Fila de selección de fechas */}
+                <Text style={styles.sectionTitle}>Filtro de Fecha</Text>
                 <View style={styles.dateRow}>
-                    <View style={styles.dateInput}>
-                        <Text>Desde:</Text>
-                        <TouchableOpacity onPress={() => openDatePicker("start")} style={styles.dateButton}>
-                            <Text>{formatDate(startDate)}</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.dateInput}>
-                        <Text>Hasta (Opcional):</Text>
-                        <TouchableOpacity onPress={() => openDatePicker("end")} style={styles.dateButton}>
-                            <Text>{endDate ? formatDate(endDate) : "Solo un día"}</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity onPress={() => openDatePicker("start")} style={styles.dateButton}>
+                        <Text>Desde: {formatDate(startDate)}</Text>
+                    </TouchableOpacity>
+                    {/* Optional End Date */}
                 </View>
 
-                {/* Componente DateTimePicker (solo visible cuando showDatePicker es true) */}
                 {showDatePicker && (
                     <DateTimePicker
                         value={datePickerMode === "start" ? startDate : (endDate || startDate)}
@@ -239,23 +191,20 @@ export default function TamboDetalle() {
                         onChange={handleDateChange}
                     />
                 )}
-
-                {/* Botón para aplicar filtros y actualizar el gráfico */}
-                <TouchableOpacity onPress={updateChart} style={styles.updateButton}>
-                    <Text style={styles.updateButtonText}>Actualizar valores del gráfico</Text>
-                </TouchableOpacity>
             </View>
 
-            {/* Contenedor del gráfico */}
             <View style={styles.chartContainer}>
-                <Text style={styles.sectionTitle}>Gráfico de Mediciones</Text>
-                {showChart ? renderChart() : <Text style={styles.infoText}>Selecciona fechas y actualiza para ver el gráfico.</Text>}
+                <Text style={styles.sectionTitle}>Evolución ITH (24h)</Text>
+                {renderChart()}
             </View>
+
+            <ComplianceLog mediciones={filteredData} />
+
+            <View style={{ height: 50 }} />
         </ScrollView>
     );
 }
 
-// Estilos del componente
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -271,7 +220,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
         textAlign: "center",
-        marginBottom: 20,
+        marginBottom: 10,
         color: "#444",
     },
     backLink: {
@@ -295,37 +244,21 @@ const styles = StyleSheet.create({
     },
     dateRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 15,
-    },
-    dateInput: {
-        flex: 1,
-        marginRight: 10,
+        alignItems: 'center'
     },
     dateButton: {
         padding: 10,
         backgroundColor: "#e9ecef",
         borderRadius: 5,
-        marginTop: 5,
-        alignItems: "center",
-    },
-    updateButton: {
-        backgroundColor: "#007bff",
-        padding: 12,
-        borderRadius: 5,
-        alignItems: "center",
-    },
-    updateButtonText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 16,
+        flex: 1
     },
     chartContainer: {
         backgroundColor: "#fff",
         padding: 15,
         borderRadius: 8,
         elevation: 2,
-        marginBottom: 30,
+        marginBottom: 20,
+        minHeight: 350
     },
     chart: {
         marginVertical: 8,
@@ -336,10 +269,24 @@ const styles = StyleSheet.create({
         color: "#666",
         marginTop: 20,
     },
-    infoText: {
-        textAlign: "center",
-        color: "#888",
-        fontStyle: "italic",
-        marginTop: 10,
+    legendContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 10
+    },
+    dot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginRight: 5
+    },
+    legendText: {
+        fontSize: 12,
+        color: '#666'
     }
 });

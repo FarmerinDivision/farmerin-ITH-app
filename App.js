@@ -10,10 +10,12 @@ import { View, StyleSheet } from "react-native";
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
+  console.log("PrivateRoute check, currentUser:", currentUser ? "Logged In" : "Not Logged In");
   return currentUser ? children : <Navigate to="/login" />;
 }
 
 export default function App() {
+  console.log("App component rendering");
   return (
     <NativeRouter>
       <AuthProvider>

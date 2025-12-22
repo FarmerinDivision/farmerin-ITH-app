@@ -4,6 +4,7 @@ import { Link, useNavigate, Navigate } from "react-router-native";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 
 export default function Login() {
+    console.log("Login component rendering");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -12,6 +13,7 @@ export default function Login() {
     const navigate = useNavigate();
 
     if (currentUser) {
+        console.log("Login: User already logged in, redirecting");
         return <Navigate to="/home" />;
     }
 
@@ -22,7 +24,9 @@ export default function Login() {
             await login(email, password);
             navigate("/home");
         } catch (err) {
-            setError("Failed to log in: " + err.message);
+            console.error(err);
+            const message = getFriendlyErrorMessage(err.code);
+            setError(message);
         }
 
         setLoading(false);
@@ -137,3 +141,20 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 });
+
+function getFriendlyErrorMessage(errorCode) {
+    switch (errorCode) {
+        case 'auth/invalid-credential':
+            return 'Correo electrónico o contraseña incorrectos.';
+        case 'auth/user-not-found':
+            return 'No existe una cuenta con este correo.';
+        case 'auth/wrong-password':
+            return 'Contraseña incorrecta.';
+        case 'auth/invalid-email':
+            return 'Formato de correo inválido.';
+        case 'auth/too-many-requests':
+            return 'Demasiados intentos fallidos. Intente más tarde.';
+        default:
+            return 'Error al iniciar sesión. Verifique sus datos.';
+    }
+}
