@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDatabase } from "firebase/database";
 
-// TODO: Replace the following with your app's Firebase project configuration
-// See: https://firebase.google.com/docs/web/learn-more#config-object
+// TODO: Reemplazar con la configuración de tu proyecto Firebase
+// Ver: https://firebase.google.com/docs/web/learn-more#config-object
 const firebaseConfig = {
   apiKey: "AIzaSyAhClLvAdEiz8do8WfsTZn-qKFqfvia_uc",
   authDomain: "freshcow-ith.firebaseapp.com",
@@ -15,11 +16,13 @@ const firebaseConfig = {
   measurementId: "G-3VE84RC7YE"
 };
 
-// Initialize Firebase
+// Inicializar la aplicación de Firebase
 console.log("Initializing Firebase app...");
 const app = initializeApp(firebaseConfig);
 
-// Initialize services
-export const auth = getAuth(app);
-export const db = getDatabase(app);
+// Inicializar servicios y exportarlos para uso en la app
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+}); // Servicio de Autenticación con persistencia
+export const db = getDatabase(app); // Servicio de Base de Datos en Tiempo Real
 console.log("Firebase services initialized");

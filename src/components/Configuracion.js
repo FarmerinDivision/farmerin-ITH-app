@@ -1,13 +1,21 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-native";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useNavigate } from "react-router-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import Usuario from "./Usuario";
+import Ayuda from "./Ayuda";
 
 export default function Configuracion() {
+    // Obtener datos del usuario y función de logout
     const { currentUser, logout } = useAuth();
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    // 'menu', 'profile', 'help'
+    const [currentView, setCurrentView] = useState("menu");
 
+    /**
+     * Maneja el proceso de cerrar sesión.
+     */
     async function handleLogout() {
         setError("");
         try {
@@ -18,29 +26,73 @@ export default function Configuracion() {
         }
     }
 
+    /**
+     * Componente reutilizable para botones de menú
+     */
+    const MenuButton = ({ title, onPress, color = '#fff', textColor = '#333' }) => (
+        <TouchableOpacity
+            style={[styles.menuButton, { backgroundColor: color }]}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
+            <Text style={[styles.menuButtonText, { color: textColor }]}>{title}</Text>
+            <Text style={[styles.menuButtonIcon, { color: textColor }]}>›</Text>
+        </TouchableOpacity>
+    );
+
+    // RENDER: PROFILE VIEW
+    if (currentView === "profile") {
+        return <Usuario onBack={() => setCurrentView("menu")} />;
+    }
+
+    // RENDER: HELP VIEW
+    if (currentView === "help") {
+        return <Ayuda onBack={() => setCurrentView("menu")} />;
+    }
+
+    // RENDER: MAIN MENU
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Configuración</Text>
-            {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <View style={styles.profileInfo}>
-                <Text style={styles.text}>
-                    <Text style={styles.label}>Email: </Text>
-                    {currentUser && currentUser.email}
-                </Text>
-            </View>
-
-            <View style={styles.actions}>
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+            {/* Back Button Row */}
+            <View style={styles.navBar}>
+                <TouchableOpacity onPress={() => navigate("/home")} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>‹ Volver </Text>
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.footer}>
-                <Link to="/home">
-                    <Text style={styles.link}>Volver al Home</Text>
-                </Link>
-            </View>
+            <Text style={styles.headerTitle}>Configuración</Text>
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+
+            <ScrollView contentContainerStyle={styles.menuContainer}>
+                <Text style={styles.sectionHeader}>General</Text>
+
+                <MenuButton
+                    title="Usuario"
+                    onPress={() => setCurrentView("profile")}
+                />
+
+                <MenuButton
+                    title="Ayuda"
+                    onPress={() => setCurrentView("help")}
+                />
+
+                <View style={styles.divider} />
+
+                <MenuButton
+                    title="Cerrar Sesión"
+                    onPress={handleLogout}
+                    color="#f8d7da"
+                    textColor="#721c24"
+                />
+
+                <View style={{ marginTop: 30, paddingBottom: 20 }}>
+                    <Text style={styles.textVersion}>Farmerin Division S.A. - &copy; 2020</Text>
+                    <Text style={styles.textVersion}>Developed by Facundo Peralta & Farmerin Team</Text>
+                </View>
+
+            </ScrollView>
         </View>
     );
 }
@@ -48,62 +100,118 @@ export default function Configuracion() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
         backgroundColor: "#f4f4f9",
+        paddingTop: 45 // Safe area top adjustment
     },
-    title: {
+    navBar: {
+        paddingHorizontal: 20,
+        marginBottom: 10,
+        alignItems: 'flex-start'
+    },
+    backButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 15,
+    },
+    backButtonText: {
+        color: "#297eba",
+        fontWeight: "600",
+        fontSize: 14,
+    },
+    headerTitle: {
         fontSize: 24,
         fontWeight: "bold",
         textAlign: "center",
         marginBottom: 20,
-        color: "#444",
-    },
-    profileInfo: {
-        backgroundColor: "#fff",
-        padding: 20,
-        borderRadius: 8,
-        marginBottom: 20,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    text: {
-        fontSize: 18,
-    },
-    label: {
-        fontWeight: "bold",
-    },
-    actions: {
-        marginTop: 20,
-    },
-    logoutButton: {
-        backgroundColor: "#dc3545",
-        padding: 15,
-        borderRadius: 8,
-        alignItems: "center",
-    },
-    logoutButtonText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "bold",
+        backgroundColor: '#297fba',
+        padding: 10,
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 15,
+        overflow: 'hidden',
+        color: '#fff',
+        textShadowColor: 'rgba(0, 0, 0, 0.25)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 1,
+        marginHorizontal: 20
     },
     error: {
         color: "#721c24",
         backgroundColor: "#f8d7da",
         padding: 10,
-        borderRadius: 4,
-        marginBottom: 15,
+        margin: 20,
+        borderRadius: 15,
         textAlign: "center",
     },
-    footer: {
-        marginTop: 20,
-        alignItems: "center",
+    menuContainer: {
+        padding: 20,
     },
-    link: {
-        color: "#007bff",
+    sectionHeader: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#888',
+        marginBottom: 10,
+        marginTop: 10,
+        textTransform: 'uppercase'
+    },
+    userInfoBox: {
+        backgroundColor: '#fff',
+        padding: 15,
+        borderRadius: 15,
+        marginBottom: 20,
+        borderLeftWidth: 4,
+        borderLeftColor: '#007bff',
+        elevation: 1
+    },
+    userLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 4,
+        fontWeight: '500'
+    },
+    userEmail: {
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: 'bold',
+        color: '#333'
     },
+    userData: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333'
+    },
+    menuButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 18,
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        marginBottom: 12,
+        elevation: 1,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+    },
+    menuButtonText: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    menuButtonIcon: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        opacity: 0.5
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#ddd',
+        marginVertical: 20
+    },
+    textVersion: {
+        color: "#888",
+        fontSize: 10,
+        textAlign: "center",
+        marginTop: 2
+    }
 });
