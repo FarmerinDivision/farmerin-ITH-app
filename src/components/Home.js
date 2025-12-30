@@ -43,36 +43,35 @@ export default function Home() {
                 // Iterar sobre cada tambo en la DB
                 Object.keys(data).forEach((key) => {
                     const tamboData = data[key];
-                    // Verificar si el tambo pertenece al usuario actual
-                    if (tamboData.usuario && tamboData.usuario.UID_usuario === currentUser.uid) {
-                        console.log(`Home: Tambo encontrado para el usuario: ${key}`);
 
-                        // Parsear mediciones para encontrar la última y la última activación
+                    // ✅ NUEVA VALIDACIÓN POR UID COMO KEY (Corregida para valores vacíos)
+                    if (tamboData.usuario && tamboData.usuario[currentUser.uid] !== undefined) {
+
                         let latestMedicion = null;
                         let lastActivation = null;
 
                         if (tamboData.mediciones_ith) {
-                            const sortedKeys = Object.keys(tamboData.mediciones_ith).sort(); // timestamps as strings usually sort okay ISO8601
+                            const sortedKeys = Object.keys(tamboData.mediciones_ith).sort();
+
                             if (sortedKeys.length > 0) {
-                                // Última medición (más reciente) normalizando nombres de campos
                                 const latestKey = sortedKeys[sortedKeys.length - 1];
                                 const rawLatest = tamboData.mediciones_ith[latestKey] || {};
+
                                 latestMedicion = {
                                     ...rawLatest,
                                     date: rawLatest.Date || rawLatest.date || latestKey,
-                                    estado: rawLatest.Estado !== undefined ? rawLatest.Estado : rawLatest.estado,
-                                    humedad: rawLatest.Humedad !== undefined ? rawLatest.Humedad : rawLatest.humedad,
-                                    indice: rawLatest.Indice !== undefined ? rawLatest.Indice : rawLatest.indice,
-                                    temperatura: rawLatest.Temperatura !== undefined ? rawLatest.Temperatura : rawLatest.temperatura,
+                                    estado: rawLatest.Estado ?? rawLatest.estado,
+                                    humedad: rawLatest.Humedad ?? rawLatest.humedad,
+                                    indice: rawLatest.Indice ?? rawLatest.indice,
+                                    temperatura: rawLatest.Temperatura ?? rawLatest.temperatura,
                                 };
 
-                                // Buscar la última vez que el sistema se activó (Estado ON)
                                 for (let i = sortedKeys.length - 1; i >= 0; i--) {
                                     const raw = tamboData.mediciones_ith[sortedKeys[i]] || {};
-                                    const estado = raw.Estado !== undefined ? raw.Estado : raw.estado;
+                                    const estado = raw.Estado ?? raw.estado;
+
                                     if (estado === ESTADO_SISTEMA.ON) {
-                                        const dateVal = raw.Date || raw.date || sortedKeys[i];
-                                        lastActivation = dateVal;
+                                        lastActivation = raw.Date || raw.date || sortedKeys[i];
                                         break;
                                     }
                                 }
@@ -81,15 +80,15 @@ export default function Home() {
 
                         userTambos.push({
                             id: key,
-                            // Mostrar el nombre legible sin guiones bajos
-                            nombreTambo: key.replace(/_/g, ' '),
+                            nombreTambo: key.replace(/_/g, " "),
                             mediciones: tamboData.mediciones_ith,
-                            usuario: tamboData.usuario.UID_usuario,
+                            usuario: currentUser.uid,
                             lastMedicion: latestMedicion,
-                            lastActivation
+                            lastActivation,
                         });
                     }
                 });
+
             } else {
                 console.log("Home: No se recibieron datos de la base de datos (data is null).");
             }
@@ -347,7 +346,7 @@ const styles = StyleSheet.create({
         fontSize: 10, // Small text for label
         fontWeight: "bold",
         textAlign: 'center',
-        textShadowColor: 'rgba(0,0,0,0.3)',
+        textShadowColor: 'black',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 1
     },
@@ -372,12 +371,18 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         lineHeight: 44,
         textAlign: 'center',
+        textShadowColor: 'black',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 1,
     },
 
     ithStress: {
         fontSize: 13,
         color: "#666",
         textAlign: 'center',
+        textShadowColor: 'black',
+        textShadowOffset: { width: 0.5, height: 0.5 },
+        textShadowRadius: 1,
     },
 
     detailsBox: {

@@ -2,7 +2,7 @@
 export const ITH_RANGES = {
   NO_STRESS: { max: 67, label: "Sin estrés calórico", color: "#4CAF50" }, // Verde
   MILD_STRESS: { min: 68, max: 71, label: "Estrés calórico leve", color: "#CDDC39" }, // Lima
-  MODERATE_STRESS: { min: 72, max: 79, label: "Estrés calórico moderado", color: "#FFEB3B" }, // Amarillo
+  MODERATE_STRESS: { min: 72, max: 79, label: "Estrés calórico moderado", color: "#FFEB3B" }, // Amarillo Oscuro
   HEAVY_STRESS: { min: 80, max: 89, label: "Estrés calórico pesado", color: "#FF9800" }, // Naranja
   SEVERE_STRESS: { min: 90, label: "Estrés calórico grave/mortal", color: "#F44336" }, // Rojo
 };

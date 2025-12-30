@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Image } from "react-native";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 
 export default function Ayuda({ onBack }) {
 
@@ -11,6 +12,15 @@ export default function Ayuda({ onBack }) {
                 console.log("Don't know how to open URI: " + url);
             }
         });
+    };
+
+    // Funcion de boton volver atras
+    const handleBack = () => {
+        if (onBack) {
+            onBack();
+        } else {
+            navigate(-1);
+        }
     };
 
     const contacts = [
@@ -51,13 +61,15 @@ export default function Ayuda({ onBack }) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.navBar}>
-                <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>‹ Atrás</Text>
-                </TouchableOpacity>
-            </View>
 
+            {/* 1. Apartado de Titulo */}
             <Text style={styles.headerTitle}>Ayuda</Text>
+
+            {/* 2. Boton de Volver */}
+            <TouchableOpacity onPress={handleBack} style={styles.fullWidthBackButton}>
+                <Ionicons name="arrow-back" size={20} color="#297eba" style={{ marginRight: 8 }} />
+                <Text style={styles.backButtonText}>Atras</Text>
+            </TouchableOpacity>
 
             <ScrollView contentContainerStyle={styles.content}>
                 <Text style={styles.sectionHeader}>Contacto</Text>
@@ -96,7 +108,7 @@ export default function Ayuda({ onBack }) {
 
                 <View style={styles.footerContainer}>
                     <Image
-                        source={require('../../assets/logolargo2.png')}
+                        source={require('../../assets/freshcow-sinfondo.png')}
                         style={styles.footerLogo}
                         resizeMode="contain"
                     />
@@ -117,17 +129,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginBottom: 10,
         alignItems: 'flex-start'
-    },
-    backButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 20,
-    },
-    backButtonText: {
-        color: "#297eba",
-        fontWeight: "600",
-        fontSize: 14,
     },
     headerTitle: {
         fontSize: 24,
@@ -201,12 +202,32 @@ const styles = StyleSheet.create({
     },
     footerContainer: {
         alignItems: 'center',
-        marginTop: 20,
-        marginBottom: 20
+        marginTop: -50,
+        marginBottom: 70
     },
     footerLogo: {
-        width: 200,
-        height: 60,
+        width: 500,
+        height: 255,
         opacity: 0.8
-    }
+    },
+    fullWidthBackButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center', // Center text
+        backgroundColor: '#fff',
+        paddingVertical: 12,
+        marginHorizontal: 20,
+        marginBottom: 15,
+        borderRadius: 10,
+        elevation: 1,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+    },
+    backButtonText: {
+        color: "#297eba",
+        fontWeight: "600",
+        fontSize: 16,
+    },
 });

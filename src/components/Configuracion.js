@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-native";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import Usuario from "./Usuario";
 import Ayuda from "./Ayuda";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 
 export default function Configuracion() {
     // Obtener datos del usuario y función de logout
@@ -12,6 +13,11 @@ export default function Configuracion() {
     const navigate = useNavigate();
     // 'menu', 'profile', 'help'
     const [currentView, setCurrentView] = useState("menu");
+
+    // Funcion de boton volver atras (Navegar a pantalla anterior)
+    const handleBack = () => {
+        navigate(-1);
+    };
 
     /**
      * Maneja el proceso de cerrar sesión.
@@ -40,28 +46,29 @@ export default function Configuracion() {
         </TouchableOpacity>
     );
 
-    // RENDER: PROFILE VIEW
+    // RENDER: USUARIO
     if (currentView === "profile") {
         return <Usuario onBack={() => setCurrentView("menu")} />;
     }
 
-    // RENDER: HELP VIEW
+    // RENDER: AYUDA
     if (currentView === "help") {
         return <Ayuda onBack={() => setCurrentView("menu")} />;
     }
 
-    // RENDER: MAIN MENU
+
+    // RENDER:  MENU
     return (
         <View style={styles.container}>
 
-            {/* Back Button Row */}
-            <View style={styles.navBar}>
-                <TouchableOpacity onPress={() => navigate("/home")} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>‹ Volver </Text>
-                </TouchableOpacity>
-            </View>
+            {/* 1. Apartado de Titulo */}
+            <Text style={styles.headerTitle}>Configuracion</Text>
 
-            <Text style={styles.headerTitle}>Configuración</Text>
+            {/* 2. Boton de Volver */}
+            <TouchableOpacity onPress={handleBack} style={styles.fullWidthBackButton}>
+                <Ionicons name="arrow-back" size={20} color="#297eba" style={{ marginRight: 8 }} />
+                <Text style={styles.backButtonText}>Atras</Text>
+            </TouchableOpacity>
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -108,16 +115,26 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         alignItems: 'flex-start'
     },
-    backButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 15,
+    /// Boton Atras 
+    fullWidthBackButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center', // Center text
+        backgroundColor: '#fff',
+        paddingVertical: 12,
+        marginHorizontal: 20,
+        marginBottom: 15,
+        borderRadius: 10,
+        elevation: 1,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
     backButtonText: {
         color: "#297eba",
         fontWeight: "600",
-        fontSize: 14,
+        fontSize: 16,
     },
     headerTitle: {
         fontSize: 24,

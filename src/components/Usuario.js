@@ -1,13 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Image } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase";
 import { ref, onValue } from "firebase/database";
+import { useNavigate } from "react-router-native";
+import Svg, { Path } from "react-native-svg";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
+import { getStressLevel } from "../utils/ithLogic";
+
+// Custom Farmer Icon (GiFarmer equivalent from game-icons.net)
+const FarmerIcon = ({ size = 24, color = "#000", style }) => (
+    <Svg width={size} height={size} viewBox="0 0 512 512" style={style}>
+        <Path
+            fill={color}
+            d="M379.42 24.066l-28.059 87.407 28.268 5.941-3.098 15.352-52.25 47.843-51.5-43.125-23.404-4.093c8.217-14.33 14.683-32.77 16.404-49.594 10.02-2.28 34.92-5.675 46.094-10.059-4.997-10.285-30.197-16.906-48.7-16.316-1.733-20.713-8.88-29.054-34.155-27.902-25.276 1.151-32.972 6.601-30.16 36.423-18.866 4.127-38.097 12.616-39.74 27.084 7.87-.307 32.96-2.896 40.724-3.011.66 14.1 4.4 27.847 9.97 36.375l-35.158-6.125L106 195.922l77.344 55.875 1.625 16.844-34.19 215.75h38.375l38.315-169.25 47.873 169.25h37.47l-3.564-16.407 17.094 16.407 63.062-322.532c5.01-4.54 9.265-8.481 12.094-11.312.177-10.537-2.537-18.942-5.094-24.5l.971-4.902 27.238 5.724 8.444-93.117-22.846 68.781-10.848-2.256 6.635-72.658-21.568 69.55-11.217-2.333 6.207-70.77zM406 27.62l.002-.01h-.002v.01zM182.844 153.39l.344 64.095-31.5-23.75 31.156-40.345zm88.031 21.252 50.875 45.937s22.993-19.456 44.875-38.531L309.187 467.61l-42.812-197.529 4.5-95.44z"
+        />
+    </Svg>
+);
 
 export default function Usuario({ onBack }) {
     const { currentUser } = useAuth();
     const [tambos, setTambos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!currentUser) return;
@@ -16,13 +31,35 @@ export default function Usuario({ onBack }) {
         const unsubscribe = onValue(tambosRef, (snapshot) => {
             const data = snapshot.val();
             const userTambos = [];
+
             if (data) {
                 Object.keys(data).forEach((key) => {
                     const tamboData = data[key];
-                    if (tamboData.usuario && tamboData.usuario.UID_usuario === currentUser.uid) {
+                    // Filter by current user UID (Key check)
+                    if (tamboData.usuario && tamboData.usuario[currentUser.uid] !== undefined) {
+
+                        // Parse latest measurement for status
+                        let latestMedicion = null;
+                        if (tamboData.mediciones_ith) {
+                            const sortedKeys = Object.keys(tamboData.mediciones_ith).sort();
+                            if (sortedKeys.length > 0) {
+                                const latestKey = sortedKeys[sortedKeys.length - 1];
+                                const rawLatest = tamboData.mediciones_ith[latestKey] || {};
+                                latestMedicion = {
+                                    ...rawLatest,
+                                    date: rawLatest.Date || rawLatest.date || latestKey,
+                                    estado: rawLatest.Estado !== undefined ? rawLatest.Estado : rawLatest.estado,
+                                    humedad: rawLatest.Humedad !== undefined ? rawLatest.Humedad : rawLatest.humedad,
+                                    indice: rawLatest.Indice !== undefined ? rawLatest.Indice : rawLatest.indice,
+                                    temperatura: rawLatest.Temperatura !== undefined ? rawLatest.Temperatura : rawLatest.temperatura,
+                                };
+                            }
+                        }
+
                         userTambos.push({
                             id: key,
-                            nombre: key.replace(/_/g, ' ')
+                            nombre: key.replace(/_/g, ' '),
+                            latestMedicion
                         });
                     }
                 });
@@ -34,43 +71,106 @@ export default function Usuario({ onBack }) {
         return unsubscribe;
     }, [currentUser]);
 
+    // Funcion de boton volver atras
+    const handleBack = () => {
+        if (onBack) {
+            onBack();
+        } else {
+            navigate(-1);
+        }
+    };
+
     return (
         <View style={styles.container}>
-            <View style={styles.navBar}>
-                <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>‹ Atrás</Text>
-                </TouchableOpacity>
-            </View>
 
+            {/* 1. Header Title (Ayuda.js style) */}
             <Text style={styles.headerTitle}>Usuario</Text>
 
+            {/* 2. Full Width Back Button with Ionicons (Restored) */}
+            <TouchableOpacity onPress={handleBack} style={styles.fullWidthBackButton}>
+                <Ionicons name="arrow-back" size={20} color="#297eba" style={{ marginRight: 8 }} />
+                <Text style={styles.backButtonText}>Atras</Text>
+            </TouchableOpacity>
+
             <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.card}>
-                    <Text style={styles.label}>Nombre:</Text>
-                    <Text style={styles.value}>{currentUser?.displayName || "No registrado"}</Text>
 
-                    <View style={styles.divider} />
-
-                    <Text style={styles.label}>Correo Electrónico:</Text>
-                    <Text style={styles.value}>{currentUser?.email}</Text>
+                {/* Profile Header */}
+                <View style={styles.profileHeader}>
+                    <View style={styles.profileIconContainer}>
+                        {/* Using Farmer Icon here as well */}
+                        <FarmerIcon size={40} color="#fff" />
+                    </View>
+                    <View style={styles.profileInfo}>
+                        <Text style={styles.userName}>
+                            {currentUser?.displayName || "Usuario Farmerin"}
+                        </Text>
+                        <Text style={styles.userEmail}>{currentUser?.email}</Text>
+                        {/* Role Badge removed as requested */}
+                    </View>
                 </View>
 
-                <Text style={styles.sectionTitle}>Mis Tambos</Text>
-                {loading ? (
-                    <ActivityIndicator size="small" color="#007bff" />
-                ) : (
-                    <View style={styles.card}>
-                        {tambos.length > 0 ? (
-                            tambos.map((tambo, index) => (
-                                <View key={tambo.id} style={[styles.tamboItem, index < tambos.length - 1 && styles.borderBottom]}>
-                                    <Text style={styles.tamboName}>{tambo.nombre}</Text>
+                {/* Establishments Section */}
+                <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Mis Tambos</Text>
+
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#297eba" style={{ marginTop: 20 }} />
+                    ) : (
+                        <View style={styles.listContainer}>
+                            {tambos.length > 0 ? (
+                                tambos.map((tambo) => {
+                                    // Calculate status
+                                    const ithValue = tambo.latestMedicion ? Number(tambo.latestMedicion.indice) || 0 : 0;
+                                    const stressInfo = getStressLevel(ithValue);
+                                    const hasData = !!tambo.latestMedicion;
+
+                                    return (
+                                        // Changed from TouchableOpacity to View (Read-only)
+                                        <View
+                                            key={tambo.id}
+                                            style={[styles.tamboCard, { borderLeftColor: hasData ? stressInfo.color : '#ccc' }]}
+                                        >
+                                            <View style={styles.cardContent}>
+                                                <View style={styles.cardMain}>
+                                                    <View style={styles.iconWrapper}>
+                                                        <FontAwesome5 name="warehouse" size={18} color="#555" />
+                                                    </View>
+                                                    <Text style={styles.tamboName}>{tambo.nombre}</Text>
+                                                </View>
+
+                                                {/* Status Indicator */}
+                                                <View style={styles.statusContainer}>
+                                                    {hasData ? (
+                                                        <>
+                                                            <View style={[styles.statusBadge, { backgroundColor: stressInfo.color }]}>
+                                                                <Text style={styles.statusText}>ITH {ithValue.toFixed(1)}</Text>
+                                                            </View>
+                                                            <Text style={styles.statusLabel}>{stressInfo.label}</Text>
+                                                        </>
+                                                    ) : (
+                                                        <Text style={styles.noDataText}>Sin datos recientes</Text>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        </View>
+                                    );
+                                })
+                            ) : (
+                                <View style={styles.emptyState}>
+                                    <Ionicons name="leaf-outline" size={48} color="#ccc" />
+                                    <Text style={styles.emptyText}>No tienes tambos asociados.</Text>
                                 </View>
-                            ))
-                        ) : (
-                            <Text style={styles.noData}>No tienes tambos asociados.</Text>
-                        )}
-                    </View>
-                )}
+                            )}
+                        </View>
+                    )}
+                </View>
+                <View style={styles.footerContainer}>
+                    <Image
+                        source={require('../../assets/freshcow-sinfondo.png')}
+                        style={styles.footerLogo}
+                        resizeMode="contain"
+                    />
+                </View>
             </ScrollView>
         </View>
     );
@@ -80,29 +180,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f4f4f9",
-        paddingTop: 45 // Safe area top adjustment
+        paddingTop: 45 // Safe area
     },
-    navBar: {
-        paddingHorizontal: 20,
-        marginBottom: 10,
-        alignItems: 'flex-start'
-    },
-    backButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 20,
-    },
-    backButtonText: {
-        color: "#297eba",
-        fontWeight: "600",
-        fontSize: 14,
-    },
+    // Ayuda.js Header Title Style
     headerTitle: {
         fontSize: 24,
         fontWeight: "bold",
         textAlign: "center",
-        marginBottom: 20,
+        marginBottom: 10, // Adjusted margin between title and back button
         backgroundColor: '#297eba',
         padding: 10,
         borderWidth: 1,
@@ -115,60 +200,169 @@ const styles = StyleSheet.create({
         textShadowRadius: 1,
         marginHorizontal: 20
     },
-    content: {
-        padding: 20,
+    // New Full Width Back Button Style
+    fullWidthBackButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center', // Center text
+        backgroundColor: '#fff',
+        paddingVertical: 12,
+        marginHorizontal: 20,
+        marginBottom: 15,
+        borderRadius: 10,
+        elevation: 1,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
-    card: {
+    backButtonText: {
+        color: "#297eba",
+        fontWeight: "600",
+        fontSize: 16,
+    },
+    content: {
+        paddingHorizontal: 20,
+        paddingBottom: 40
+    },
+    // Profile Header Styles
+    profileHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#fff',
         borderRadius: 15,
         padding: 20,
-        marginBottom: 20,
+        marginBottom: 25,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    profileIconContainer: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: '#4db14f', // Green style as requested
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+        borderWidth: 2,
+        borderColor: '#e1e1e1'
+    },
+    profileInfo: {
+        flex: 1,
+    },
+    userName: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 2
+    },
+    userEmail: {
+        fontSize: 14,
+        color: "#666",
+        marginBottom: 6
+    },
+    // Role Badge style removed
+    // Section Styles
+    sectionContainer: {
+        flex: 1
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#2c3e50",
+        marginBottom: 2,
+        marginLeft: 5
+    },
+    sectionSubtitle: {
+        fontSize: 14,
+        color: "#7f8c8d",
+        marginBottom: 15,
+        marginLeft: 5
+    },
+    listContainer: {
+        gap: 12
+    },
+    tamboCard: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderLeftWidth: 5,
         elevation: 1,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 2,
     },
-    label: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 4,
-        fontWeight: '500'
+    cardContent: {
+        flex: 1,
     },
-    value: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333'
+    cardMain: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 6
     },
-    divider: {
-        height: 1,
-        backgroundColor: '#eee',
-        marginVertical: 15
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#555',
-        marginBottom: 10,
-        marginLeft: 5,
-        textTransform: 'uppercase'
-    },
-    tamboItem: {
-        paddingVertical: 12,
-    },
-    borderBottom: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0'
+    iconWrapper: {
+        marginRight: 8,
+        width: 24,
+        alignItems: 'center'
     },
     tamboName: {
         fontSize: 16,
-        color: '#333',
-        fontWeight: '500'
+        fontWeight: "600",
+        color: "#333"
     },
-    noData: {
+    statusContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 32
+    },
+    statusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 6,
+        marginRight: 8
+    },
+    statusText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold'
+    },
+    statusLabel: {
+        fontSize: 12,
+        color: '#666',
+        fontStyle: 'italic'
+    },
+    noDataText: {
+        fontSize: 12,
         color: '#999',
-        fontStyle: 'italic',
-        textAlign: 'center',
-        padding: 10
-    }
+        fontStyle: 'italic'
+    },
+    emptyState: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 40,
+        opacity: 0.6
+    },
+    emptyText: {
+        marginTop: 10,
+        color: '#666',
+        fontSize: 16
+    },
+    footerContainer: {
+        alignItems: 'center',
+        marginTop: -50,
+        marginBottom: 70
+    },
+    footerLogo: {
+        width: 500,
+        height: 270,
+        opacity: 0.8
+    },
 });

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate, Navigate } from "react-router-native";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Login() {
     console.log("Login component rendering");
@@ -90,7 +91,7 @@ export default function Login() {
                                 onPress={() => setShowPassword(!showPassword)}
                                 style={styles.eyeButton}
                             >
-                                <Text style={{ fontSize: 18 }}>{showPassword ? "🚫" : "👁️"}</Text>
+                                <Ionicons name={showPassword ? "eye" : "eye-off"} size={24} color="#777" />
                             </TouchableOpacity>
                         </View>
                     </View>

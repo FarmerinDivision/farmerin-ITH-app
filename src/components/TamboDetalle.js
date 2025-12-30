@@ -10,6 +10,14 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 
 
+const FILTER_OPTIONS = [
+    { label: 'MIN', val: 'MIN', color: '#2196F3' },
+    { label: 'MED', val: 'MED', color: '#4CAF50' },
+    { label: 'MAX', val: 'MAX', color: '#F44336' },
+    { label: 'LLUVIA', val: 'LLUVIA', color: '#607D8B' }, // BlueGrey
+    { label: 'MANUAL', val: 'MANUAL', color: '#9C27B0' }
+];
+
 export default function TamboDetalle() {
     // Obtener el ID del tambo de la URL
     const { id } = useParams();
@@ -364,13 +372,7 @@ export default function TamboDetalle() {
 
                     {/* Filter Buttons for List */}
                     <View style={styles.stateFilterRow}>
-                        {[
-                            { label: 'MIN', val: 'MIN', color: '#2196F3' },
-                            { label: 'MED', val: 'MED', color: '#4CAF50' },
-                            { label: 'MAX', val: 'MAX', color: '#F44336' },
-                            { label: 'LLUVIA', val: 'LLUVIA', color: '#607D8B' }, // BlueGrey
-                            { label: 'MANUAL', val: 'MANUAL', color: '#9C27B0' }
-                        ].map((f) => (
+                        {FILTER_OPTIONS.map((f) => (
                             <TouchableOpacity
                                 key={f.val}
                                 style={[
@@ -433,8 +435,8 @@ export default function TamboDetalle() {
                                 const ithVal = parseFloat(item.indice);
                                 let ithColor = 'black';
                                 if (ithVal < 68) ithColor = '#4CAF50';
-                                else if (ithVal < 72) ithColor = '#CDDC39';
-                                else if (ithVal < 80) ithColor = '#FFEB3B';
+                                else if (ithVal < 72) ithColor = '#cedf3aff';
+                                else if (ithVal < 80) ithColor = '#caba2eff';
                                 else if (ithVal < 90) ithColor = '#FF9800';
                                 else ithColor = '#F44336';
 
@@ -445,8 +447,11 @@ export default function TamboDetalle() {
                                 else if (tempVal < 36) tempColor = '#FF9800';
                                 else tempColor = '#F44336';
 
+                                const activeFilterOption = FILTER_OPTIONS.find(f => f.val === selectedStateFilter);
+                                const borderColor = activeFilterOption ? activeFilterOption.color : '#007bff';
+
                                 return (
-                                    <View key={item.id || `${index}-${selectedStateFilter}`} style={styles.listItem}>
+                                    <View key={item.id || `${index}-${selectedStateFilter}`} style={[styles.listItem, { borderLeftColor: borderColor }]}>
                                         <View style={styles.listHeader}>
                                             <Text style={styles.listDate}>{dateLabel} <Text style={styles.listTime}>{timeLabel}</Text></Text>
                                             <Text style={styles.listState}>{labelEstado}</Text>

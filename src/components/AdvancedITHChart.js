@@ -346,8 +346,8 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
                         const ithVal = parseFloat(points[tooltipIndex].data.indice);
                         let ithColor = 'black';
                         if (ithVal < 68) ithColor = '#4CAF50';
-                        else if (ithVal < 72) ithColor = '#CDDC39';
-                        else if (ithVal < 80) ithColor = '#FFEB3B';
+                        else if (ithVal < 72) ithColor = '#bbca33ff';
+                        else if (ithVal < 80) ithColor = '#d6c52fff';
                         else if (ithVal < 90) ithColor = '#FF9800';
                         else ithColor = '#F44336';
 

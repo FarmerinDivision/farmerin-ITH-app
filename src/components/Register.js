@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-native";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Register() {
     // Estados para el formulario
@@ -9,6 +10,7 @@ export default function Register() {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -109,14 +111,22 @@ export default function Register() {
 
                 <View style={styles.formGroup}>
                     <Text style={styles.label}>Contraseña</Text>
-                    <TextInput
-                        style={[styles.input, errors.password && styles.inputError]}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        placeholder="********"
-                        placeholderTextColor="#aaa"
-                    />
+                    <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
+                        <TextInput
+                            style={styles.passwordInput}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                            placeholder="********"
+                            placeholderTextColor="#aaa"
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(!showPassword)}
+                            style={styles.eyeButton}
+                        >
+                            <Ionicons name={showPassword ? "eye" : "eye-off"} size={24} color="#777" />
+                        </TouchableOpacity>
+                    </View>
                     {errors.password && <Text style={styles.fieldError}>{errors.password}</Text>}
                 </View>
 
@@ -270,5 +280,23 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 4,
         marginLeft: 5
-    }
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: "#f9f9f9",
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 10,
+        paddingHorizontal: 15,
+    },
+    passwordInput: {
+        flex: 1,
+        paddingVertical: 15,
+        fontSize: 16,
+        color: "#333",
+    },
+    eyeButton: {
+        padding: 5,
+    },
 });
