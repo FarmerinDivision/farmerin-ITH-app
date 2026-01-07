@@ -117,10 +117,10 @@ export default function Home() {
         }
     };
 
-    // Helpers: color conversions and contrast calculation
-    // Configurable tuning constants (adjust to change visual intensity/contrast)
-    const ITH_TINT_ALPHA = 0.16; // default tint opacity for ITH box (was 0.08)
-    const CONTRAST_LUMINANCE_THRESHOLD = 186; // threshold for choosing black or white text
+    // Ayudantes: conversiones de color y cálculo de contraste
+    // Constantes de ajuste configurables (ajustar para cambiar intensidad visual/contraste)
+    const ITH_TINT_ALPHA = 0.16; // opacidad de tinte predeterminada para caja ITH (era 0.08)
+    const CONTRAST_LUMINANCE_THRESHOLD = 186; // umbral para elegir texto negro o blanco
 
     const hexToRgba = (hex, alpha = 1) => {
         let c = hex.replace('#', '');
@@ -141,7 +141,7 @@ export default function Home() {
         const r = parseInt(c.substring(0, 2), 16);
         const g = parseInt(c.substring(2, 4), 16);
         const b = parseInt(c.substring(4, 6), 16);
-        // Perceived luminance
+        // Luminancia percibida
         const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
         return luminance > CONTRAST_LUMINANCE_THRESHOLD ? '#000' : '#fff';
     };
@@ -192,13 +192,13 @@ export default function Home() {
                         const cardColor = (!hasDataToday || isOff) ? '#828588' : stressInfo.color;
 
                         // Calcular colores derivados: texto contrastado y fondo tintado para la caja ITH
-                        // User requested: Value and Stress Text should ALWAYS use the main Stress Color
-                        // irrespective of data date or system status.
+                        // Solicitado por usuario: El texto de Valor y Estrés SIEMPRE debe usar el color principal de Estrés
+                        // independientemente de la fecha de los datos o el estado del sistema.
 
-                        // Force using the stress color for the TEXT elements as requested
+                        // Forzar el uso del color de estrés para los elementos de TEXTO según lo solicitado
                         const contentColor = stressInfo.color;
 
-                        // We also want the background tint to match the stress color
+                        // También queremos que el tinte de fondo coincida con el color de estrés
                         const ithBoxBackground = hexToRgba(stressInfo.color, ITH_TINT_ALPHA);
 
                         return (
@@ -206,7 +206,7 @@ export default function Home() {
                                 key={tambo.id}
                                 onPress={() => navigate(`/tambo/${tambo.id}`)}
                                 style={[styles.card, { borderLeftColor: cardColor }]}
-                                underlayColor="#4db14f40" // Green with ~25% opacity
+                                underlayColor="#4db14f40" // Verde con ~25% de opacidad
                                 activeOpacity={0.9}
                             >
                                 <View>
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f4f4f9",
-        paddingTop: 45 // Safe area top adjustment
+        paddingTop: 45 // Ajuste de zona segura superior
     },
     center: {
         flex: 1,
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         color: "white",
-        fontSize: 10, // Small text for label
+        fontSize: 10, // Texto pequeño para etiqueta
         fontWeight: "bold",
         textAlign: 'center',
         textShadowColor: 'black',
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         alignItems: "center",
         borderTopWidth: 0,
-        backgroundColor: '#f4f4f9' // Transparent/Background color
+        backgroundColor: '#f4f4f9' // Transparente/Color de fondo
     },
     configButtonWrapper: {
         marginHorizontal: 20,

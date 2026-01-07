@@ -108,7 +108,7 @@ export default function Ayuda({ onBack }) {
 
                 <View style={styles.footerContainer}>
                     <Image
-                        source={require('../../assets/freshcow-sinfondo.png')}
+                        source={require('../../assets/logolargo2.png')}
                         style={styles.footerLogo}
                         resizeMode="contain"
                     />
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f4f4f9",
-        paddingTop: 45 // Safe area top adjustment
+        paddingTop: 45 // Ajuste de zona segura superior
     },
     navBar: {
         paddingHorizontal: 20,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         marginBottom: 20,
-        backgroundColor: '#297eba',
+        backgroundColor: '#4db14f',
         padding: 10,
         borderWidth: 1,
         borderColor: 'black',
@@ -206,14 +206,14 @@ const styles = StyleSheet.create({
         marginBottom: 70
     },
     footerLogo: {
-        width: 500,
+        width: 250,
         height: 255,
         opacity: 0.8
     },
     fullWidthBackButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center', // Center text
+        justifyContent: 'center', // Centrar texto
         backgroundColor: '#fff',
         paddingVertical: 12,
         marginHorizontal: 20,

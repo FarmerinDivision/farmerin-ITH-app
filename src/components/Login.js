@@ -46,7 +46,7 @@ export default function Login() {
             setLoading(true);
             await resetPassword(email);
             Alert.alert("Correo enviado", "Revise su correo para poder cambiar su contraseña. Si no lo encuentra, verifique su spam.");
-            setIsResettingPassword(false); // Optionally go back to login
+            setIsResettingPassword(false); // Opcionalmente volver al inicio de sesión
         } catch (err) {
             setError("Error al enviar correo de restablecimiento: " + err.message);
         }
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         padding: 20,
-        backgroundColor: "#f4f4f9", // Background color consistent with app
+        backgroundColor: "#f4f4f9", // Color de fondo consistente con la app
     },
     logo: {
         width: 300,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     },
     card: {
         backgroundColor: "#fff",
-        borderRadius: 15, // Softer corners
+        borderRadius: 15, // Esquinas más suaves
         padding: 25,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         marginBottom: 30,
-        color: "#297eba", // Primary app color
+        color: "#297eba", // Color principal de la app
     },
     formGroup: {
         marginBottom: 20,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#ddd",
         borderRadius: 10,
-        paddingHorizontal: 15, // Padding for container, input removal
+        paddingHorizontal: 15, // Relleno para contenedor
     },
     passwordInput: {
         flex: 1,
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
         padding: 5,
     },
     button: {
-        backgroundColor: "#4db14f", // Primary app color
+        backgroundColor: "#4db14f", // Color principal de la app
         padding: 15,
         borderRadius: 10,
         alignItems: "center",

@@ -45,7 +45,7 @@ export default function TamboDetalle() {
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
     // Determinar dimensiones del gráfico según modo
-    // WindowWidth - 40 (Margins: 20*2) - 30 (Padding: 15*2) = WindowWidth - 70
+    // AnchoVentana - 40 (Márgenes: 20*2) - 30 (Relleno: 15*2) = AnchoVentana - 70
     const screenWidth = windowWidth - 70;
     const screenHeight = windowHeight;
     const chartHeight = isFullscreen ? screenHeight - 60 : 350;
@@ -336,7 +336,7 @@ export default function TamboDetalle() {
                             mode="date"
                             display="default"
                             onChange={handleDateChange}
-                            maximumDate={new Date()} // Restrict to today or earlier
+                            maximumDate={new Date()} // Restringir a hoy o antes
                         />
                     )}
                 </View>
@@ -361,16 +361,16 @@ export default function TamboDetalle() {
                     </View>
                 </View>
 
-                {/* Render Chart */}
+                {/* Renderizar gráfico */}
                 {renderChart()}
             </View>
 
-            {/* DATA LIST SECTION */}
+            {/* SECCIÓN DE LISTA DE DATOS */}
             <View style={styles.listSection}>
                 <View style={styles.paddedContent}>
                     <Text style={styles.sectionTitle}>Registros Detallados</Text>
 
-                    {/* Filter Buttons for List */}
+                    {/* Botones de filtro para la lista */}
                     <View style={styles.stateFilterRow}>
                         {FILTER_OPTIONS.map((f) => (
                             <TouchableOpacity
@@ -391,12 +391,12 @@ export default function TamboDetalle() {
                 </View>
 
                 {(() => {
-                    // Logic to determine which data to show
+                    // Lógica para determinar qué datos mostrar
                     let displayData = [];
 
                     if (selectedStateFilter) {
-                        // FILTERING ACTIVE: Search in FULL dataset (filteredData)
-                        // Define filter codes based on selection
+                        // FILTRADO ACTIVO: Buscar en TODO el conjunto de datos (filteredData)
+                        // Definir códigos de filtro basados en la selección
                         let targetCodes = [];
                         if (selectedStateFilter === 'MIN') targetCodes = [1, 11];
                         else if (selectedStateFilter === 'MED') targetCodes = [2, 12];
@@ -404,17 +404,17 @@ export default function TamboDetalle() {
                         else if (selectedStateFilter === 'LLUVIA') targetCodes = [4];
                         else if (selectedStateFilter === 'MANUAL') targetCodes = [5];
 
-                        // Filter and reverse for display
+                        // Filtrar e invertir para mostrar
                         displayData = filteredData
                             .filter(d => targetCodes.includes(d.estado))
-                            .sort((a, b) => b.parsedDate - a.parsedDate); // Newest first
+                            .sort((a, b) => b.parsedDate - a.parsedDate); // El más reciente primero
                     } else {
-                        // NO FILTER: Show the chart data (already processed/subsampled)
-                        // Just reverse for list
+                        // SIN FILTRO: Mostrar los datos del gráfico (ya procesados/submuestreados)
+                        // Simplemente invertir para la lista
                         displayData = chartData ? [...chartData].reverse() : [];
                     }
 
-                    // LIMIT logic
+                    // Lógica de LÍMITE
                     const INITIAL_LIMIT = 5;
                     const limit = showAllRecords ? 100 : INITIAL_LIMIT;
                     const slicedData = displayData.slice(0, limit);
@@ -431,7 +431,7 @@ export default function TamboDetalle() {
                                 const dateLabel = item.parsedDate.toLocaleDateString();
                                 const labelEstado = ESTADOS_LABEL[item.estado] || 'Desconocido';
 
-                                // Determine Colors (Copy-Paste Logic)
+                                // Determinar colores (Lógica de copiar y pegar)
                                 const ithVal = parseFloat(item.indice);
                                 let ithColor = 'black';
                                 if (ithVal < 68) ithColor = '#4CAF50';
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         backgroundColor: '#4db14f',
         padding: 10,
-        marginTop: 60, // Padding top moved here
+        marginTop: 60, // El relleno superior se movió aquí
         borderWidth: 1,
         borderColor: 'black',
         borderRadius: 15,
@@ -535,12 +535,12 @@ const styles = StyleSheet.create({
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center', // Centered content
+        justifyContent: 'center', // Contenido centrado
         backgroundColor: '#fff',
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 15,
-        // alignSelf: 'flex-start', // Removed to follow full width
+        // alignSelf: 'flex-start', // Eliminado para seguir el ancho completo
         marginBottom: 20,
         elevation: 2,
         shadowColor: "#000",
@@ -550,13 +550,13 @@ const styles = StyleSheet.create({
     },
     backButtonIcon: {
         fontSize: 24,
-        color: '#007bff',
+        color: '#297fba',
         marginRight: 5,
         marginTop: -4,
         fontWeight: '300'
     },
     backButtonText: {
-        color: "#007bff",
+        color: "#297fba",
         fontSize: 16,
         fontWeight: "600",
     },
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
         borderRadius: 15
     },
     filterBtnActive: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#297fba',
     },
     filterBtnText: {
         color: '#333',
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold'
     },
-    // New Styles for State Filter
+    // Nuevos estilos para el filtro de estado
     stateFilterRow: {
         flexDirection: 'row',
         justifyContent: 'space-around',
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     chartContainer: {
-        // Removed to allow separate control
+        // Eliminado para permitir control separado
     },
     chartControlRow: {
         flexDirection: 'row',
@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
     },
     chartWrapper: {
         alignItems: 'center',
-        marginVertical: 0, // Tighten up
+        marginVertical: 0, // Ajustar
     },
     noData: {
         textAlign: "center",
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         elevation: 1,
         borderLeftWidth: 5,
-        borderLeftColor: '#007bff' // Default accent
+        borderLeftColor: '#007bff' // Acento predeterminado
     },
     listHeader: {
         flexDirection: 'row',

@@ -8,7 +8,7 @@ import Svg, { Path } from "react-native-svg";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { getStressLevel } from "../utils/ithLogic";
 
-// Custom Farmer Icon (GiFarmer equivalent from game-icons.net)
+// Icono personalizado de granjero (equivalente de GiFarmer de game-icons.net)
 const FarmerIcon = ({ size = 24, color = "#000", style }) => (
     <Svg width={size} height={size} viewBox="0 0 512 512" style={style}>
         <Path
@@ -35,10 +35,10 @@ export default function Usuario({ onBack }) {
             if (data) {
                 Object.keys(data).forEach((key) => {
                     const tamboData = data[key];
-                    // Filter by current user UID (Key check)
+                    // Filtrar por UID del usuario actual (verificación de clave)
                     if (tamboData.usuario && tamboData.usuario[currentUser.uid] !== undefined) {
 
-                        // Parse latest measurement for status
+                        // Analizar la última medición para el estado
                         let latestMedicion = null;
                         if (tamboData.mediciones_ith) {
                             const sortedKeys = Object.keys(tamboData.mediciones_ith).sort();
@@ -83,10 +83,10 @@ export default function Usuario({ onBack }) {
     return (
         <View style={styles.container}>
 
-            {/* 1. Header Title (Ayuda.js style) */}
+            {/* 1. Título del encabezado (estilo Ayuda.js) */}
             <Text style={styles.headerTitle}>Usuario</Text>
 
-            {/* 2. Full Width Back Button with Ionicons (Restored) */}
+            {/* 2. Botón de retroceso de ancho completo con Ionicons (Restaurado) */}
             <TouchableOpacity onPress={handleBack} style={styles.fullWidthBackButton}>
                 <Ionicons name="arrow-back" size={20} color="#297eba" style={{ marginRight: 8 }} />
                 <Text style={styles.backButtonText}>Atras</Text>
@@ -94,10 +94,10 @@ export default function Usuario({ onBack }) {
 
             <ScrollView contentContainerStyle={styles.content}>
 
-                {/* Profile Header */}
+                {/* Encabezado del perfil */}
                 <View style={styles.profileHeader}>
                     <View style={styles.profileIconContainer}>
-                        {/* Using Farmer Icon here as well */}
+                        {/* Usando el icono de granjero aquí también */}
                         <FarmerIcon size={40} color="#fff" />
                     </View>
                     <View style={styles.profileInfo}>
@@ -105,11 +105,11 @@ export default function Usuario({ onBack }) {
                             {currentUser?.displayName || "Usuario Farmerin"}
                         </Text>
                         <Text style={styles.userEmail}>{currentUser?.email}</Text>
-                        {/* Role Badge removed as requested */}
+                        {/* Insignia de rol eliminada según lo solicitado */}
                     </View>
                 </View>
 
-                {/* Establishments Section */}
+                {/* Sección de establecimientos */}
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Mis Tambos</Text>
 
@@ -119,13 +119,13 @@ export default function Usuario({ onBack }) {
                         <View style={styles.listContainer}>
                             {tambos.length > 0 ? (
                                 tambos.map((tambo) => {
-                                    // Calculate status
+                                    // Calcular estado
                                     const ithValue = tambo.latestMedicion ? Number(tambo.latestMedicion.indice) || 0 : 0;
                                     const stressInfo = getStressLevel(ithValue);
                                     const hasData = !!tambo.latestMedicion;
 
                                     return (
-                                        // Changed from TouchableOpacity to View (Read-only)
+                                        // Cambiado de TouchableOpacity a View (Solo lectura)
                                         <View
                                             key={tambo.id}
                                             style={[styles.tamboCard, { borderLeftColor: hasData ? stressInfo.color : '#ccc' }]}
@@ -138,7 +138,7 @@ export default function Usuario({ onBack }) {
                                                     <Text style={styles.tamboName}>{tambo.nombre}</Text>
                                                 </View>
 
-                                                {/* Status Indicator */}
+                                                {/* Indicador de estado */}
                                                 <View style={styles.statusContainer}>
                                                     {hasData ? (
                                                         <>
@@ -166,7 +166,7 @@ export default function Usuario({ onBack }) {
                 </View>
                 <View style={styles.footerContainer}>
                     <Image
-                        source={require('../../assets/freshcow-sinfondo.png')}
+                        source={require('../../assets/logolargo2.png')}
                         style={styles.footerLogo}
                         resizeMode="contain"
                     />
@@ -180,15 +180,15 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f4f4f9",
-        paddingTop: 45 // Safe area
+        paddingTop: 45 // Zona segura
     },
-    // Ayuda.js Header Title Style
+    // Estilo de título de encabezado de Ayuda.js
     headerTitle: {
         fontSize: 24,
         fontWeight: "bold",
         textAlign: "center",
-        marginBottom: 10, // Adjusted margin between title and back button
-        backgroundColor: '#297eba',
+        marginBottom: 10, // Margen ajustado entre título y botón de retroceso
+        backgroundColor: '#4db14f',
         padding: 10,
         borderWidth: 1,
         borderColor: 'black',
@@ -200,11 +200,11 @@ const styles = StyleSheet.create({
         textShadowRadius: 1,
         marginHorizontal: 20
     },
-    // New Full Width Back Button Style
+    // Nuevo estilo de botón de retroceso de ancho completo
     fullWidthBackButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center', // Center text
+        justifyContent: 'center', // Centrar texto
         backgroundColor: '#fff',
         paddingVertical: 12,
         marginHorizontal: 20,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingBottom: 40
     },
-    // Profile Header Styles
+    // Estilos de encabezado de perfil
     profileHeader: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: '#4db14f', // Green style as requested
+        backgroundColor: '#4db14f', // Estilo verde según lo solicitado
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 15,
@@ -264,8 +264,8 @@ const styles = StyleSheet.create({
         color: "#666",
         marginBottom: 6
     },
-    // Role Badge style removed
-    // Section Styles
+    // Estilo de insignia de rol eliminado
+    // Estilos de sección
     sectionContainer: {
         flex: 1
     },
@@ -361,8 +361,8 @@ const styles = StyleSheet.create({
         marginBottom: 70
     },
     footerLogo: {
-        width: 500,
-        height: 270,
+        width: 250,
+        height: 255,
         opacity: 0.8
     },
 });

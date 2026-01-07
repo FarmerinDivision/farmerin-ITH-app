@@ -11,7 +11,7 @@ export default function Configuracion() {
     const { currentUser, logout } = useAuth();
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    // 'menu', 'profile', 'help'
+    // Valores posibles: 'menu', 'profile', 'help'
     const [currentView, setCurrentView] = useState("menu");
 
     // Funcion de boton volver atras (Navegar a pantalla anterior)
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f4f4f9",
-        paddingTop: 45 // Safe area top adjustment
+        paddingTop: 45 // Ajuste de zona segura superior
     },
     navBar: {
         paddingHorizontal: 20,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     fullWidthBackButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center', // Center text
+        justifyContent: 'center', // Centrar texto
         backgroundColor: '#fff',
         paddingVertical: 12,
         marginHorizontal: 20,
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         marginBottom: 20,
         borderLeftWidth: 4,
-        borderLeftColor: '#007bff',
+        borderLeftColor: '#297fba',
         elevation: 1
     },
     userLabel: {

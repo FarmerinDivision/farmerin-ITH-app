@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: "center",
         padding: 20,
-        backgroundColor: "#f4f4f9", // Background color consistent with app
+        backgroundColor: "#f4f4f9", // Color de fondo consistente con la app
     },
     logo: {
         width: 300,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         marginBottom: 30,
-        color: "#297eba", // Primary app color
+        color: "#297eba", // Color principal de la app
     },
     formGroup: {
         marginBottom: 20,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
         color: "#333",
     },
     button: {
-        backgroundColor: "#4db14f", // Primary app color
+        backgroundColor: "#4db14f", // Color principal de la app
         padding: 15,
         borderRadius: 10,
         alignItems: "center",

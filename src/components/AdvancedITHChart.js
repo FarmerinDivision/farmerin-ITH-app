@@ -46,7 +46,7 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
         // Escala Eje Izquierdo (Temperatura 0-50)
         const scaleTemp = (val) => {
             const min = 0;
-            const max = 50; // Max temp expected
+            const max = 50; // Temperatura máxima esperada
             const clampedVal = Math.max(min, Math.min(max, val));
             return CHART_HEIGHT - ((clampedVal - min) / (max - min)) * CHART_HEIGHT;
         };
@@ -94,7 +94,7 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
             return { x, yTemp, yHum, yIth, data: d };
         });
 
-        // Generar franjas de estado (rectángulos de fondo) - OPTIMIZADO: Merging
+        // Generar franjas de estado (rectángulos de fondo) - OPTIMIZADO: Fusión
         const stateRects = [];
         if (points.length > 1) {
             let currentRect = {
@@ -107,7 +107,7 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
                 const curr = points[i];
                 const next = points[i + 1];
                 const w = next.x - curr.x;
-                const nextColor = ESTADOS_COLOR[curr.data.estado] || 'transparent'; // Use current point's state for the interval
+                const nextColor = ESTADOS_COLOR[curr.data.estado] || 'transparent'; // Usar el estado del punto actual para el intervalo
 
                 if (nextColor === currentRect.color) {
                     // Mismo color, extender ancho
@@ -118,13 +118,13 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
                         stateRects.push(currentRect);
                     }
                     currentRect = {
-                        x: curr.x, // El nuevo empieza donde termina el anterior (visual continuity) roughly
+                        x: curr.x, // El nuevo empieza donde termina el anterior (continuidad visual) aproximadamente
                         width: w,
                         color: nextColor
                     };
                 }
             }
-            // Push last rect
+            // Insertar el último rectángulo
             if (currentRect.width > 0) {
                 stateRects.push(currentRect);
             }
@@ -311,7 +311,7 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
                     );
                 })}
 
-                {/* --- TOOLTIP LINE & DOT (Inside SVG for sync) --- */}
+                {/* --- LÍNEA Y PUNTO DE TOOLTIP (Dentro de SVG para sincronización) --- */}
                 {tooltipIndex !== null && points[tooltipIndex] && (
                     <G>
                         <Line
@@ -336,7 +336,7 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
                 {chartContent}
             </ScrollView>
 
-            {/* INFO BOX (Fixed Overlay) */}
+            {/* CAJA DE INFORMACIÓN (Superposición Fija) */}
             {tooltipIndex !== null && points[tooltipIndex] && (
                 <View style={styles.tooltipBox}>
                     <Text style={styles.tooltipTitle}>
