@@ -213,7 +213,8 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
         <Svg width={effectiveWidth} height={height} onPress={handlePress}>
             <G x={PADDING_LEFT} y={PADDING_TOP}>
                 {/* --- FONDO: ESTADOS --- */}
-                {stateRects.map((rect, i) => (
+                {/* --- FONDO: ESTADOS (Desactivado por petición del usuario - Fondo blanco) --- */}
+                {/* {stateRects.map((rect, i) => (
                     <Rect
                         key={`st-${i}`}
                         x={rect.x}
@@ -222,7 +223,7 @@ export default function AdvancedITHChart({ data, width, height, zoomLevel = 1.0 
                         height={CHART_HEIGHT}
                         fill={rect.color}
                     />
-                ))}
+                ))} */}
 
                 {/* --- EJES Y GRILLA --- */}
                 {/* Grilla Eje Y Izquierdo (Temperatura) */}

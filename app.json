@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "farmerin-ITH-app",
+    "name": "Farmerin - FreshCow",
     "slug": "farmerin-ITH-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,14 +17,20 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/FresCow-Splash.png",
+        "foregroundImage": "./assets/FresgCowLogo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.farmerinexpodev.farmerinITHapp"
     },
     "web": {
-      "favicon": "./assets/FresCow-Splash.png"
-    }
+      "favicon": "./assets/FresgCowLogo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d9198f10-273e-4173-aff6-3ab381c6dddb"
+      }
+    },
+    "owner": "farmerinexpodev"
   }
 }
