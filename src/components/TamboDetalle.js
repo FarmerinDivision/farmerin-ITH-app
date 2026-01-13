@@ -126,7 +126,7 @@ export default function TamboDetalle() {
                         humedad: item.Humedad !== undefined ? item.Humedad : item.humedad,
                         indice: item.Indice !== undefined ? item.Indice : item.indice,
                         temperatura: item.Temperatura !== undefined ? item.Temperatura : item.temperatura,
-                        parsedDate: new Date(item.Date || item.date)
+                        parsedDate: new Date(String(item.Date || item.date).replace("Z", ""))
                     };
                 });
                 // Ordenar por fecha ascendente para el gráfico
@@ -200,7 +200,7 @@ export default function TamboDetalle() {
             }
 
             // Actualizar gráfico automáticamente al seleccionar fecha
-            filterData(allMediciones, newStart, newEnd);
+            // filterData(allMediciones, newStart, newEnd);
         }
     };
 
@@ -319,13 +319,21 @@ export default function TamboDetalle() {
 
                     {/* Selectores de Fecha (Solo visible en modo Custom) */}
                     {filterMode === 'custom' && (
-                        <View style={styles.dateRow}>
-                            <TouchableOpacity onPress={() => openDatePicker("start")} style={styles.dateButton}>
-                                <Text>Desde: {formatDate(startDate)}</Text>
-                            </TouchableOpacity>
-                            <Text style={{ marginHorizontal: 10 }}> - </Text>
-                            <TouchableOpacity onPress={() => openDatePicker("end")} style={styles.dateButton}>
-                                <Text>Hasta: {endDate ? formatDate(endDate) : '...'}</Text>
+                        <View>
+                            <View style={styles.dateRow}>
+                                <TouchableOpacity onPress={() => openDatePicker("start")} style={styles.dateButton}>
+                                    <Text>Desde: {formatDate(startDate)}</Text>
+                                </TouchableOpacity>
+                                <Text style={{ marginHorizontal: 10 }}> - </Text>
+                                <TouchableOpacity onPress={() => openDatePicker("end")} style={styles.dateButton}>
+                                    <Text>Hasta: {endDate ? formatDate(endDate) : '...'}</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.searchButton}
+                                onPress={() => filterData(allMediciones, startDate, endDate)}
+                            >
+                                <Text style={styles.searchButtonText}>Buscar</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -640,6 +648,23 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         flex: 1,
         alignItems: 'center'
+    },
+    searchButton: {
+        marginTop: 10,
+        backgroundColor: '#297fba',
+        padding: 12,
+        borderRadius: 15,
+        alignItems: 'center',
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.5,
+    },
+    searchButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16
     },
     chartContainer: {
         // Eliminado para permitir control separado

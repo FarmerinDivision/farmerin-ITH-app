@@ -66,15 +66,10 @@ export default function Home() {
                                     temperatura: rawLatest.Temperatura ?? rawLatest.temperatura,
                                 };
 
-                                for (let i = sortedKeys.length - 1; i >= 0; i--) {
-                                    const raw = tamboData.mediciones_ith[sortedKeys[i]] || {};
-                                    const estado = raw.Estado ?? raw.estado;
-
-                                    if (estado === ESTADO_SISTEMA.ON) {
-                                        lastActivation = raw.Date || raw.date || sortedKeys[i];
-                                        break;
-                                    }
-                                }
+                                // Se eliminó la búsqueda hacia atrás de "lastActivation" (estado ON).
+                                // Ahora "Ultima act." reflejará simplemente la fecha de la última medición recibida,
+                                // coincidiendo con el "último valor de la base de datos".
+                                lastActivation = latestMedicion.date;
                             }
                         }
 
@@ -84,7 +79,7 @@ export default function Home() {
                             mediciones: tamboData.mediciones_ith,
                             usuario: currentUser.uid,
                             lastMedicion: latestMedicion,
-                            lastActivation,
+                            lastActivation, // Ahora es igual a latestMedicion.date
                         });
                     }
                 });
@@ -110,11 +105,39 @@ export default function Home() {
     const formatDate = (isoString) => {
         if (!isoString) return "-";
         try {
-            const date = new Date(isoString);
-            return date.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+            // El usuario reporta inconsistencia horaria (ej: DB 09:28Z -> App muestra 07:00, Real 10:00).
+            // Probablemente el dispositivo envía hora LOCAL pero con sufijo 'Z'. 
+            // Solución: Quitar la 'Z' para tratar la fecha como LOCAL (ignorando timezone UTC).
+            // De "2026-01-13T09:28:40Z" -> "2026-01-13T09:28:40" (Local Time)
+            const localString = String(isoString).replace("Z", "");
+            const d = new Date(localString);
+
+            if (isNaN(d.getTime())) {
+                // Fallback si falla el parseo sin Z (raro, pero preventivo)
+                const d2 = new Date(isoString);
+                if (!isNaN(d2.getTime())) {
+                    return formatDateObj(d2);
+                }
+                return isoString;
+            }
+            return formatDateObj(d);
         } catch (e) {
             return isoString;
         }
+    };
+
+    const formatDateObj = (date) => {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString().slice(-2); // YY para ser conciso o fullYear? Usuario mostró YY (06).
+        // Usuario mostró "7/2/06". Probablemente quiere DD/MM/YY. 
+        // Pero "2026" se vería mejor como "26".
+        // Voy a poner DD/MM/YY, HH:mm para coincidir con el estilo compacto pero corregir el orden.
+        // O mejor: DD/MM/YYYY para evitar confusión 2006 vs 2026.
+        const fullYear = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${day}/${month}/${fullYear}, ${hours}:${minutes}`;
     };
 
     // Ayudantes: conversiones de color y cálculo de contraste
@@ -238,7 +261,7 @@ export default function Home() {
                                                 {tambo.lastActivation && (
                                                     <View style={{ alignItems: 'flex-start', marginTop: 5 }}>
                                                         <Text style={[styles.timeText, { marginBottom: 2 }]}>
-                                                            🌡️ Última act.
+                                                            🌡️ Ultima act.
                                                         </Text>
                                                         <Text style={[styles.timeText, { fontWeight: 'bold', marginTop: 0 }]}>
                                                             {formatDate(tambo.lastActivation)}
